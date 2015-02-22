@@ -149,6 +149,8 @@ public class GetUsersService extends IntentService {
     private User parseUserJSONObject(JSONObject item) throws JSONException {
         return new User.Builder()
                 .setName(item.getString("name"))
+                .setGravatarEmail(item.getString("gravatar"))
+                .setTwitterName(item.getString("twitter"))
                 .build();
     }
 }
