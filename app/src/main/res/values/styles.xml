@@ -1,0 +1,11 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@drawable/html_bg</item>
+    </style>
+
+</resources>
