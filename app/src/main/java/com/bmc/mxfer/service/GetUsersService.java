@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.bmc.mxfer.model.Device;
+import com.bmc.mxfer.model.Rom;
 import com.bmc.mxfer.model.User;
 import com.bmc.mxfer.util.HttpRequestExecutor;
 import com.bmc.mxfer.util.Utils;
@@ -31,8 +32,6 @@ public class GetUsersService extends IntentService {
     public static final String ACTION_CHECK = "com.bmc.mxfer.action.CHECK";
 
     private HttpRequestExecutor mHttpExecutor;
-
-    private SharedPreferences mPrefs;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -123,8 +122,6 @@ public class GetUsersService extends IntentService {
                 JSONObject result = new JSONObject(jsonString);
                 JSONArray userList = result.getJSONArray("users");
 
-                Log.d(TAG, "Got user list with " + userList.length() + " entries");
-
                 for (int i = 0; i < userList.length(); i++) {
                     if (mHttpExecutor.isAborted()) {
                         Log.d(TAG, "ParseJson - HttpExecutor aborted");
@@ -136,6 +133,7 @@ public class GetUsersService extends IntentService {
                     JSONObject item = userList.getJSONObject(i);
                     // Get the devices for this user
                     Device[] devices = getDevicesForUser(item.getJSONArray("devices"));
+                    // Create the user object
                     User user = parseUserJSONObject(item, devices);
 
                     if (user != null) {
@@ -159,22 +157,53 @@ public class GetUsersService extends IntentService {
                 .build();
     }
 
-    private Device parseDeviceJsonObject(JSONObject item) throws JSONException {
+    private Device parseDeviceJsonObject(JSONObject item, Rom[] roms) throws JSONException {
         return new Device.Builder()
                 .setName(item.getString("codename"))
+                .setRoms(roms)
+                .build();
+    }
+
+    private Rom parseRomJsonObject(JSONObject item) throws JSONException {
+        return new Rom.Builder()
+                .setUrl(item.getString("url"))
+                .setDate(item.getString("date"))
+                .setFilename(item.getString("filename"))
+                .setSize(item.getLong("size"))
                 .build();
     }
 
     public Device[] getDevicesForUser(JSONArray deviceList) throws JSONException {
         ArrayList<Device> devices = new ArrayList<>();
         for (int i = 0; i < deviceList.length(); i++) {
+            if (deviceList.isNull(i)) {
+                continue;
+            }
             JSONObject item = deviceList.getJSONObject(i);
-            Device device = parseDeviceJsonObject(item);
+            // Get the ROMs available for this device
+            Rom[] roms = getRomsForDevices(item.getJSONArray("roms"));
+            // Create the Device object
+            Device device = parseDeviceJsonObject(item, roms);
             if (device != null) {
-                Log.d(TAG, "device codename=" + device.getCodeName());
                 devices.add(device);
             }
         }
         return devices.toArray(new Device[devices.size()]);
+    }
+
+    private Rom[] getRomsForDevices(JSONArray romList) throws JSONException {
+        ArrayList<Rom> roms = new ArrayList<>();
+        for (int i = 0; i < romList.length(); i++) {
+            if (romList.isNull(i)) {
+                continue;
+            }
+            JSONObject item = romList.getJSONObject(i);
+            // Create the ROM object
+            Rom rom = parseRomJsonObject(item);
+            if (rom != null) {
+                roms.add(rom);
+            }
+        }
+        return roms.toArray(new Rom[roms.size()]);
     }
 }

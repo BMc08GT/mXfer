@@ -7,6 +7,7 @@ import java.io.Serializable;
 
 public class Device implements Parcelable, Serializable {
     private String codename;
+    private Rom[] roms;
 
     private Device() {
         // Use builder yo
@@ -22,6 +23,14 @@ public class Device implements Parcelable, Serializable {
      */
     public String getCodeName() {
         return codename;
+    }
+
+    /**
+     * Get the rom's available for this device
+     * @return roms
+     */
+    public Rom[] getRoms() {
+        return roms;
     }
 
     @Override
@@ -46,23 +55,32 @@ public class Device implements Parcelable, Serializable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(codename);
+        out.writeTypedArray(roms, 0);
     }
 
     public void readFromParcel(Parcel in) {
         codename = in.readString();
+        roms = in.createTypedArray(Rom.CREATOR);
     }
 
     public static class Builder {
         private String codename;
+        private Rom[] roms;
 
         public Builder setName(String name) {
             codename = name;
             return this;
         }
 
+        public Builder setRoms(Rom[] availableRoms) {
+            roms = availableRoms;
+            return this;
+        }
+
         public Device build() {
             Device device = new Device();
             device.codename = codename;
+            device.roms = roms;
 
             return device;
         }
