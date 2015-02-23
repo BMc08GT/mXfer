@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.bmc.mxfer.model.Device;
 import com.bmc.mxfer.model.User;
 import com.bmc.mxfer.util.HttpRequestExecutor;
 import com.bmc.mxfer.util.Utils;
@@ -121,11 +122,10 @@ public class GetUsersService extends IntentService {
             if (jsonString != null) {
                 JSONObject result = new JSONObject(jsonString);
                 JSONArray userList = result.getJSONArray("users");
-                int userSize = userList.length();
 
-                Log.d(TAG, "Got user list with " + userSize + " entries");
+                Log.d(TAG, "Got user list with " + userList.length() + " entries");
 
-                for (int i = 0; i < userSize; i++) {
+                for (int i = 0; i < userList.length(); i++) {
                     if (mHttpExecutor.isAborted()) {
                         Log.d(TAG, "ParseJson - HttpExecutor aborted");
                         break;
@@ -134,8 +134,10 @@ public class GetUsersService extends IntentService {
                         continue;
                     }
                     JSONObject item = userList.getJSONObject(i);
-                    User user = parseUserJSONObject(item);
-                    Log.d(TAG, item.toString());
+                    // Get the devices for this user
+                    Device[] devices = getDevicesForUser(item.getJSONArray("devices"));
+                    User user = parseUserJSONObject(item, devices);
+
                     if (user != null) {
                         users.add(user);
                     }
@@ -147,12 +149,32 @@ public class GetUsersService extends IntentService {
         return users;
     }
 
-    private User parseUserJSONObject(JSONObject item) throws JSONException {
+    private User parseUserJSONObject(JSONObject item, Device[] devices) throws JSONException {
         return new User.Builder()
                 .setName(item.getString("name"))
                 .setGravatarEmail(item.getString("gravatar"))
                 .setTwitterName(item.getString("twitter"))
                 .setGithubUrl(item.getString("github"))
+                .setDevices(devices)
                 .build();
+    }
+
+    private Device parseDeviceJsonObject(JSONObject item) throws JSONException {
+        return new Device.Builder()
+                .setName(item.getString("codename"))
+                .build();
+    }
+
+    public Device[] getDevicesForUser(JSONArray deviceList) throws JSONException {
+        ArrayList<Device> devices = new ArrayList<>();
+        for (int i = 0; i < deviceList.length(); i++) {
+            JSONObject item = deviceList.getJSONObject(i);
+            Device device = parseDeviceJsonObject(item);
+            if (device != null) {
+                Log.d(TAG, "device codename=" + device.getCodeName());
+                devices.add(device);
+            }
+        }
+        return devices.toArray(new Device[devices.size()]);
     }
 }

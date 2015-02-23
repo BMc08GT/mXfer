@@ -11,6 +11,7 @@ public class User implements Parcelable, Serializable {
     private String gravatarEmail;
     private String twitterName;
     private String githubUrl;
+    private Device[] devices;
 
     private User() {
         // Use builder yo
@@ -52,6 +53,14 @@ public class User implements Parcelable, Serializable {
         return githubUrl;
     }
 
+    /**
+     * Get the devices the user has developed for
+     * @return devices
+     */
+    public Device[] getDevices() {
+        return devices;
+    }
+
     @Override
     public String toString() {
         return "User: " + " name=" + name + "\n"
@@ -80,6 +89,7 @@ public class User implements Parcelable, Serializable {
         out.writeString(gravatarEmail);
         out.writeString(twitterName);
         out.writeString(githubUrl);
+        out.writeTypedArray(devices, 0);
     }
 
     public void readFromParcel(Parcel in) {
@@ -87,6 +97,7 @@ public class User implements Parcelable, Serializable {
         gravatarEmail = in.readString();
         twitterName = in.readString();
         githubUrl = in.readString();
+        devices = in.createTypedArray(Device.CREATOR);
     }
 
     public static class Builder {
@@ -94,6 +105,7 @@ public class User implements Parcelable, Serializable {
         private String gravatarEmail;
         private String twitterName;
         private String githubUrl;
+        private Device[] devices;
 
         public Builder setName(String userName) {
             name = userName;
@@ -115,12 +127,18 @@ public class User implements Parcelable, Serializable {
             return this;
         }
 
+        public Builder setDevices(Device[] deviceList) {
+            devices = deviceList;
+            return this;
+        }
+
         public User build() {
             User user = new User();
             user.name = name;
             user.gravatarEmail = gravatarEmail;
             user.twitterName = twitterName;
             user.githubUrl = githubUrl;
+            user.devices = devices;
 
             return user;
         }
