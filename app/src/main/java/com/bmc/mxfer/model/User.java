@@ -10,6 +10,7 @@ public class User implements Parcelable, Serializable {
     private String name;
     private String gravatarEmail;
     private String twitterName;
+    private String githubUrl;
 
     private User() {
         // Use builder yo
@@ -43,11 +44,20 @@ public class User implements Parcelable, Serializable {
         return twitterName;
     }
 
+    /**
+     * Get the user's Github url address
+     * @return githubUrl
+     */
+    public String getGithubUrl() {
+        return githubUrl;
+    }
+
     @Override
     public String toString() {
         return "User: " + " name=" + name + "\n"
-                + "gravatarEmail=" + gravatarEmail + "\n"
-                + "twitterName=" + twitterName;
+                + "gravatar email=" + gravatarEmail + "\n"
+                + "twitter name=" + twitterName + "\n"
+                + "github address=" + githubUrl;
     }
 
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
@@ -69,18 +79,21 @@ public class User implements Parcelable, Serializable {
         out.writeString(name);
         out.writeString(gravatarEmail);
         out.writeString(twitterName);
+        out.writeString(githubUrl);
     }
 
     public void readFromParcel(Parcel in) {
         name = in.readString();
         gravatarEmail = in.readString();
         twitterName = in.readString();
+        githubUrl = in.readString();
     }
 
     public static class Builder {
         private String name;
         private String gravatarEmail;
         private String twitterName;
+        private String githubUrl;
 
         public Builder setName(String userName) {
             name = userName;
@@ -97,11 +110,17 @@ public class User implements Parcelable, Serializable {
             return this;
         }
 
+        public Builder setGithubUrl(String address) {
+            githubUrl = address;
+            return this;
+        }
+
         public User build() {
             User user = new User();
             user.name = name;
             user.gravatarEmail = gravatarEmail;
             user.twitterName = twitterName;
+            user.githubUrl = githubUrl;
 
             return user;
         }

@@ -135,6 +135,7 @@ public class GetUsersService extends IntentService {
                     }
                     JSONObject item = userList.getJSONObject(i);
                     User user = parseUserJSONObject(item);
+                    Log.d(TAG, item.toString());
                     if (user != null) {
                         users.add(user);
                     }
@@ -151,6 +152,7 @@ public class GetUsersService extends IntentService {
                 .setName(item.getString("name"))
                 .setGravatarEmail(item.getString("gravatar"))
                 .setTwitterName(item.getString("twitter"))
+                .setGithubUrl(item.getString("github"))
                 .build();
     }
 }
